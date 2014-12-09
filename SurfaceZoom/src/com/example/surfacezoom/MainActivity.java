@@ -15,7 +15,8 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback,
 		OnPreparedListener {
 	private SurfaceView mSurfaceView;
 	private SurfaceHolder mSurfaceHolder;
-	private static final String videoUrl = "https://archive.org/download/ksnn_compilation_master_the_internet/ksnn_compilation_master_the_internet_512kb.mp4";
+	private String videoUrl = "http://www.androidbegin.com/tutorial/AndroidCommercial.3gp";
+	//private String videoUrl ="https://archive.org/download/ksnn_compilation_master_the_internet/ksnn_compilation_master_the_internet_512kb.mp4";
 	private MediaPlayer mMediaPlayer;
 	private FrameLayout mFrameLayout;
 
@@ -29,8 +30,8 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback,
 		mSurfaceHolder = mSurfaceView.getHolder();
 		mSurfaceHolder.addCallback(this);
 
-		mSurfaceView.setOnTouchListener(new PanAndZoomListener(mFrameLayout,
-				mSurfaceView, Anchor.CENTER));
+		/*mSurfaceView.setOnTouchListener(new PanAndZoomListener(mFrameLayout,
+				mSurfaceView, Anchor.CENTER));*/
 	}
 
 	@Override

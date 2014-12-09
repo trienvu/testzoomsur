@@ -1,11 +1,14 @@
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/relMainView"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="#5555"
+    android:gravity="top"
     android:padding="20dp" >
 
-    <SurfaceView
+    <com.example.surfacezoom.TouchExampleView
         android:id="@+id/surfaceview"
         android:layout_width="match_parent"
         android:layout_height="match_parent" />
