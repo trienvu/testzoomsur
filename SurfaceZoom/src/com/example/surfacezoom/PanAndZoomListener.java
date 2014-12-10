@@ -36,6 +36,23 @@ public class PanAndZoomListener implements OnTouchListener {
 	float oldDist = 1f;
 	PanZoomCalculator panZoomCalculator;
 
+	private float mPos0X;
+	private float mPos0Y;
+
+	private float mLast0TouchX;
+	private float mLast0TouchY;
+
+	private float mPos1X;
+	private float mPos1Y;
+
+	private float mLast1TouchX;
+	private float mLast1TouchY;
+
+	boolean isFirtTouch = false;
+	float twoPointDist;
+
+	float newDist;
+
 	public PanAndZoomListener(FrameLayout containter, View view, int anchor) {
 		panZoomCalculator = new PanZoomCalculator(containter, view, anchor);
 	}
@@ -50,13 +67,25 @@ public class PanAndZoomListener implements OnTouchListener {
 			mode = DRAG;
 			break;
 		case MotionEvent.ACTION_POINTER_DOWN:
+			mLast0TouchX = event.getX(0);
+			mLast0TouchY = event.getY(0);
+			Log.d("trien", "X0:" + mLast0TouchX);
+			Log.d("trien", "Y0:" + mLast0TouchY);
+
+			mLast1TouchX = event.getX(1);
+			mLast1TouchY = event.getY(1);
+
+			Log.d("trien", "X1:" + mLast1TouchX);
+			Log.d("trien", "X1:" + mLast1TouchX);
+
 			oldDist = spacing(event);
-			Log.d(TAG, "oldDist=" + oldDist);
+
 			if (oldDist > 10f) {
 				midPoint(mid, event);
 				mode = ZOOM;
 				Log.d(TAG, "mode=ZOOM");
 			}
+
 			break;
 		case MotionEvent.ACTION_UP:
 		case MotionEvent.ACTION_POINTER_UP:
@@ -64,17 +93,26 @@ public class PanAndZoomListener implements OnTouchListener {
 			Log.d(TAG, "mode=NONE");
 			break;
 		case MotionEvent.ACTION_MOVE:
-			if (mode == DRAG) {
-				panZoomCalculator.doPan(event.getX() - start.x, event.getY()
-						- start.y);
-				start.set(event.getX(), event.getY());
-			} else if (mode == ZOOM) {
-				float newDist = spacing(event);
+			/*
+			 * if (mode == DRAG) { panZoomCalculator.doPan(event.getX() -
+			 * start.x, event.getY() - start.y); start.set(event.getX(),
+			 * event.getY()); } else if (mode == ZOOM) { float newDist =
+			 * spacing(event); Log.d(TAG, "newDist=" + newDist); if (newDist >
+			 * 10f) { float scale = newDist / oldDist; oldDist = newDist;
+			 * panZoomCalculator.doZoom(scale, mid); } }
+			 */
+			if (mode == ZOOM) {
+				twoPointDist = spacingTwoPoint(event);
+				
+				newDist = spacing(event);
 				Log.d(TAG, "newDist=" + newDist);
-				if (newDist > 10f) {
-					float scale = newDist / oldDist;
-					oldDist = newDist;
-					panZoomCalculator.doZoom(scale, mid);
+				if (twoPointDist >= 5f) {
+					Log.d(TAG, "newDist=" + newDist);
+					if (newDist > 10f) {
+						float scale = newDist / oldDist;
+						oldDist = newDist;
+						panZoomCalculator.doZoom(scale, mid);
+					}
 				}
 			}
 			break;
@@ -88,6 +126,33 @@ public class PanAndZoomListener implements OnTouchListener {
 		float x = event.getX(0) - event.getX(1);
 		float y = event.getY(0) - event.getY(1);
 		return FloatMath.sqrt(x * x + y * y);
+	}
+
+	private float spacingTwoPoint(MotionEvent event) {
+		final float x0 = event.getX(0);
+		final float y0 = event.getY(0);
+		final float d0x = x0 - mLast0TouchX;
+		final float d0y = y0 - mLast0TouchY;
+
+		final float x1 = event.getX(1);
+		final float y1 = event.getY(1);
+		final float d1x = x1 - mLast1TouchX;
+		final float d1y = y1 - mLast1TouchY;
+
+		mPos0X += d0x;
+		mPos0Y += d0y;
+
+		mLast0TouchX = x0;
+		mLast0TouchY = y0;
+
+		mPos1X += d1x;
+		mPos1Y += d1y;
+
+		mLast1TouchX = x1;
+		mLast1TouchY = y1;
+
+		return (FloatMath.sqrt(d0x * d0x + d0y * d0y) + FloatMath.sqrt(d1x
+				* d1x + d1y * d1y));
 	}
 
 	// Calculate the mid point of the first two fingers
@@ -123,7 +188,7 @@ public class PanAndZoomListener implements OnTouchListener {
 			this.child = child;
 			matrix = new Matrix();
 			this.anchor = anchor;
-			onPanZoomChanged();
+			//onPanZoomChanged();
 			this.child.addOnLayoutChangeListener(new OnLayoutChangeListener() {
 				// This catches when the image bitmap changes, for some reason
 				// it doesn't recurse
@@ -131,7 +196,7 @@ public class PanAndZoomListener implements OnTouchListener {
 				public void onLayoutChange(View v, int left, int top,
 						int right, int bottom, int oldLeft, int oldTop,
 						int oldRight, int oldBottom) {
-					onPanZoomChanged();
+					//onPanZoomChanged();
 				}
 			});
 		}
@@ -269,15 +334,30 @@ public class PanAndZoomListener implements OnTouchListener {
 				MarginLayoutParams lp = (MarginLayoutParams) child
 						.getLayoutParams();
 
-				/*
-				 * lp.leftMargin = (int) currentPan.x + panJitter; lp.topMargin
-				 * = (int) currentPan.y;
-				 */
+				lp.leftMargin = (int) currentPan.x + panJitter;
+				lp.topMargin = (int) currentPan.y;
+
 				lp.width = (int) (window.getWidth() * currentZoom);
 				lp.height = (int) (window.getHeight() * currentZoom);
 				panJitter ^= 1;
 
 				child.setLayoutParams(lp);
+				boolean animate = false;
+				if (animate) {
+					ResizeSizeAnimation anim = new ResizeSizeAnimation(child,
+							(int) (window.getWidth() * currentZoom),
+							(int) (window.getHeight() * currentZoom));
+					anim.setDuration(50);
+					child.startAnimation(anim);
+				} else {
+					/*
+					 * this.leftFragmentWidthPx = leftFragmentWidthPx;
+					 * LayoutParams lp = (LayoutParams)
+					 * leftFrame.getLayoutParams(); lp.width =
+					 * leftFragmentWidthPx; leftFrame.setLayoutParams(lp);
+					 */
+					child.setLayoutParams(lp);
+				}
 			}
 		}
 	}

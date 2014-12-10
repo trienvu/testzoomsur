@@ -17,38 +17,34 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback,
 		OnPreparedListener {
 	private SurfaceView mSurfaceView;
 	private SurfaceHolder mSurfaceHolder;
-	//private String videoUrl = "http://www.androidbegin.com/tutorial/AndroidCommercial.3gp";
-	private String videoUrl ="https://archive.org/download/ksnn_compilation_master_the_internet/ksnn_compilation_master_the_internet_512kb.mp4";
+	private String videoUrl = "http://tv.zing.vn/html5/video/LmJnTicDiDybnLm?device=web_embed_html5";
+	//private String videoUrl ="rtsp://93.120.27.78:1935/live/tencrick ";
 	private MediaPlayer mMediaPlayer;
 	private FrameLayout mFrameLayout;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-/*		setContentView(R.layout.activity_main);
+		setContentView(R.layout.activity_main);
 
 		mFrameLayout = (FrameLayout) this.findViewById(R.id.relMainView);
-		mSurfaceView = (SurfaceView) this.findViewById(R.id.surfaceview);*/
+		mSurfaceView = (SurfaceView) this.findViewById(R.id.surfaceview);
 		
 		
-		FrameLayout.LayoutParams fp = new FrameLayout.LayoutParams(
+/*		FrameLayout.LayoutParams fp = new FrameLayout.LayoutParams(
 				FrameLayout.LayoutParams.MATCH_PARENT,
 				FrameLayout.LayoutParams.MATCH_PARENT, Gravity.CENTER);
 		FrameLayout view = new FrameLayout(this);
 		setContentView(view);
 
-		mSurfaceView = new SurfaceView(this);
-		// Use line below for large images if you have hardware rendering turned
-		// on
-		// imageView.setLayerType(View.LAYER_TYPE_SOFTWARE, null);
-		// Line below is optional, depending on what scaling method you want
+		mSurfaceView = new SurfaceView(this);		
 		view.addView(mSurfaceView, fp);
-
+*/
 		
 		mSurfaceHolder = mSurfaceView.getHolder();
 		mSurfaceHolder.addCallback(this);
 
-		mSurfaceView.setOnTouchListener(new PanAndZoomListener(view,
+		mSurfaceView.setOnTouchListener(new PanAndZoomListener(mFrameLayout,
 				mSurfaceView, Anchor.CENTER));
 	}
 

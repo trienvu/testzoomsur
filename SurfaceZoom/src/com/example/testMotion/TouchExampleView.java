@@ -1,5 +1,7 @@
 package com.example.testMotion;
 
+import com.example.surfacezoom.R;
+
 import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.drawable.Drawable;
@@ -8,7 +10,6 @@ import android.view.MotionEvent;
 import android.view.ScaleGestureDetector;
 import android.view.View;
 
-import com.example.surfacezoom.R;
 
 public class TouchExampleView extends View {
 
