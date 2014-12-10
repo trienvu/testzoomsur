@@ -269,8 +269,10 @@ public class PanAndZoomListener implements OnTouchListener {
 				MarginLayoutParams lp = (MarginLayoutParams) child
 						.getLayoutParams();
 
-			/*	lp.leftMargin = (int) currentPan.x + panJitter;
-				lp.topMargin = (int) currentPan.y;*/
+				/*
+				 * lp.leftMargin = (int) currentPan.x + panJitter; lp.topMargin
+				 * = (int) currentPan.y;
+				 */
 				lp.width = (int) (window.getWidth() * currentZoom);
 				lp.height = (int) (window.getHeight() * currentZoom);
 				panJitter ^= 1;

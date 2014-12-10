@@ -3,12 +3,9 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/relMainView"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:background="#5555"
-    android:gravity="top"
-    android:padding="20dp" >
+    android:layout_height="match_parent" >
 
-    <com.example.surfacezoom.TouchExampleView
+    <SurfaceView
         android:id="@+id/surfaceview"
         android:layout_width="match_parent"
         android:layout_height="match_parent" />
