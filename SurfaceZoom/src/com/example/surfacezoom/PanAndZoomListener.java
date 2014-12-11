@@ -1,6 +1,8 @@
 package com.example.surfacezoom;
 
 import android.annotation.SuppressLint;
+import android.app.Activity;
+import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Matrix;
 import android.graphics.PointF;
@@ -49,11 +51,15 @@ public class PanAndZoomListener implements OnTouchListener {
 	private float mLast1TouchY;
 
 	boolean isFirtTouch = false;
-	float twoPointDist;
 
-	float newDist;
+	float scale;
 
-	public PanAndZoomListener(FrameLayout containter, View view, int anchor) {
+	private int mCurrScale = 100;
+	private MainActivity mainActivity;
+
+	public PanAndZoomListener(Activity activity, FrameLayout containter,
+			View view, int anchor) {
+		mainActivity = (MainActivity) activity;
 		panZoomCalculator = new PanZoomCalculator(containter, view, anchor);
 	}
 
@@ -64,22 +70,16 @@ public class PanAndZoomListener implements OnTouchListener {
 		case MotionEvent.ACTION_DOWN:
 			start.set(event.getX(), event.getY());
 			Log.d(TAG, "mode=DRAG");
-			mode = DRAG;
+			// mode = DRAG;
+			mode = NONE;
 			break;
 		case MotionEvent.ACTION_POINTER_DOWN:
 			mLast0TouchX = event.getX(0);
-			mLast0TouchY = event.getY(0);
-			Log.d("trien", "X0:" + mLast0TouchX);
-			Log.d("trien", "Y0:" + mLast0TouchY);
-
+			mLast0TouchY = event.getY(0);		
 			mLast1TouchX = event.getX(1);
 			mLast1TouchY = event.getY(1);
 
-			Log.d("trien", "X1:" + mLast1TouchX);
-			Log.d("trien", "X1:" + mLast1TouchX);
-
 			oldDist = spacing(event);
-
 			if (oldDist > 10f) {
 				midPoint(mid, event);
 				mode = ZOOM;
@@ -89,34 +89,30 @@ public class PanAndZoomListener implements OnTouchListener {
 			break;
 		case MotionEvent.ACTION_UP:
 		case MotionEvent.ACTION_POINTER_UP:
+			mainActivity.getTvScale().setVisibility(View.INVISIBLE);
 			mode = NONE;
 			Log.d(TAG, "mode=NONE");
 			break;
 		case MotionEvent.ACTION_MOVE:
-			/*
-			 * if (mode == DRAG) { panZoomCalculator.doPan(event.getX() -
-			 * start.x, event.getY() - start.y); start.set(event.getX(),
-			 * event.getY()); } else if (mode == ZOOM) { float newDist =
-			 * spacing(event); Log.d(TAG, "newDist=" + newDist); if (newDist >
-			 * 10f) { float scale = newDist / oldDist; oldDist = newDist;
-			 * panZoomCalculator.doZoom(scale, mid); } }
-			 */
-			if (mode == ZOOM) {
-				twoPointDist = spacingTwoPoint(event);
-				
-				newDist = spacing(event);
+			if (mode == DRAG) {
+				panZoomCalculator.doPan(event.getX() - start.x, event.getY()
+						- start.y);
+				start.set(event.getX(), event.getY());
+			} else if (mode == ZOOM) {
+				float twoPointDist = spacingTwoPoint(event);
+				float newDist = spacing(event);
 				Log.d(TAG, "newDist=" + newDist);
-				if (twoPointDist >= 5f) {
-					Log.d(TAG, "newDist=" + newDist);
+				if (twoPointDist >= 5f) {				
 					if (newDist > 10f) {
-						float scale = newDist / oldDist;
+						scale = newDist / oldDist;
 						oldDist = newDist;
 						panZoomCalculator.doZoom(scale, mid);
 					}
 				}
 			}
-			break;
+			break;	
 		}
+
 		return true; // indicate event was handled
 	}
 
@@ -188,6 +184,7 @@ public class PanAndZoomListener implements OnTouchListener {
 			this.child = child;
 			matrix = new Matrix();
 			this.anchor = anchor;
+			
 			//onPanZoomChanged();
 			this.child.addOnLayoutChangeListener(new OnLayoutChangeListener() {
 				// This catches when the image bitmap changes, for some reason
@@ -196,7 +193,7 @@ public class PanAndZoomListener implements OnTouchListener {
 				public void onLayoutChange(View v, int left, int top,
 						int right, int bottom, int oldLeft, int oldTop,
 						int oldRight, int oldBottom) {
-					//onPanZoomChanged();
+					// onPanZoomChanged();
 				}
 			});
 		}
@@ -263,7 +260,7 @@ public class PanAndZoomListener implements OnTouchListener {
 		}
 
 		private float getMinimumZoom() {
-			return 1f;
+			return 0.5f;
 		}
 
 		// / Call this to reset the Pan/Zoom state machine
@@ -281,7 +278,10 @@ public class PanAndZoomListener implements OnTouchListener {
 			// when panning, and set the pan of the scroll view when zooming
 
 			float winWidth = window.getWidth();
-			float winHeight = window.getHeight();
+			float winHeight = window.getHeight();	
+			
+			mainActivity.getTvScale().setText(mCurrScale + "%");
+			//mainActivity.getTvScale().setVisibility(View.VISIBLE);
 
 			if (currentZoom <= 1f) {
 				currentPan.x = 0;
@@ -342,22 +342,7 @@ public class PanAndZoomListener implements OnTouchListener {
 				panJitter ^= 1;
 
 				child.setLayoutParams(lp);
-				boolean animate = false;
-				if (animate) {
-					ResizeSizeAnimation anim = new ResizeSizeAnimation(child,
-							(int) (window.getWidth() * currentZoom),
-							(int) (window.getHeight() * currentZoom));
-					anim.setDuration(50);
-					child.startAnimation(anim);
-				} else {
-					/*
-					 * this.leftFragmentWidthPx = leftFragmentWidthPx;
-					 * LayoutParams lp = (LayoutParams)
-					 * leftFrame.getLayoutParams(); lp.width =
-					 * leftFragmentWidthPx; leftFrame.setLayoutParams(lp);
-					 */
-					child.setLayoutParams(lp);
-				}
+				child.requestLayout();
 			}
 		}
 	}
